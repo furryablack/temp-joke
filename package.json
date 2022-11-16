@@ -1,0 +1,19 @@
+{
+  "name": "sms",
+  "version": "1.0.0",
+  "description": "",
+  "private": true,
+  "main": "index.js",
+  "scripts": {
+    "watch": "nodemon --exec \"node --experimental-specifier-resolution=node\" ./main.js"
+  },
+  "type": "module",
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "nodemon": "^2.0.20"
+  },
+  "nodemonConfig": {
+    "delay": 2500
+  }
+}
