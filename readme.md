@@ -1,7 +1,7 @@
 # 0
 - clone it
 - npm install
-- np run watch
+- npm run watch
 
 # 1
 
