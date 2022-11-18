@@ -1,72 +1,128 @@
+// HEAD
+
+// a better case will be moving of it in the fixtures
 const LIMIT = 140;
 const DELIMITER = ' ';
+const PRINT_RESULTS = true;
 
-const FIXTURES = [
-  'The map above is very easy to use By default the location of all existing objects in the game is immediately marked on if it information is constantly updated If you need a specific item then click on the funnel icon in the upper right corner to open the legend',
-  'Lorem ipsum dolor sit amet consectetur adipiscing elit',
-  'Lorem ipsum dolor sit amet consectetur adipiscing elit Nullam eleifend odio at magna pretium suscipit Nam commodo mauris felis ut suscipit velit efficitur eget Sed sit amet posuere risus',
-  // if it information => ifit it information
-  'BROKEN The map above is very easy to use By default the location of all existing objects in the game is immediately marked on ifif it it information is constantly updated If you need a specific item then click on the funnel icon in the upper right corner to open the legend',
-];
+// MAIN
 
-main(FIXTURES);
+main();
 
-function main(inputs = []) {
-  const results = inputs.map(inp => work(inp));
+function main() {
+  const fixtures = getFixtures(); 
+  const results = fixtures.map(fixture => work(fixture));
+  printResults(results, fixtures);  
+}
 
-  results.forEach((result, idx) => {
-    const inp = inputs[idx];
+// EXTERNAL
+
+function work(input = '') {
+  if (input.length <= LIMIT) return [input];
+
+  const words = input.split(DELIMITER);
+  
+  let cursor = 0,
+      smsMap = [[]],
+      torSet = [1];
+
+  const getSms = (p = cursor) => smsMap[p];
+  const getLTor = (p = cursor) => torSet[p];
+  const getLTorLen = (p = cursor) => getLTor(p).toString().length;
+  const getRTor = () => smsMap.length;
+  const getRTorLen = () => smsMap.length.toString().length;
+
+  const getSmsSpacesCount = (p = cursor) => {
+    const wordsCount = getSms(p).length;
+    return wordsCount >= 1 ? wordsCount - 1 : 0;
+  };
+
+  const getSmsLen = (p = cursor) => getSms(p).reduce((acc, cu) => acc + cu.length, 0) + getSmsSpacesCount(p);
+  const pushToSms = (word, p = cursor) => getSms(p).push(word);
+  
+  const moveCursor = (back = false) => {
+    if (!back) cursor++; else {
+      cursor = cursor > 0 ? cursor - 1 : cursor;
+    }
+  };
+
+  const allocateTor = () => torSet.push(torSet.length + 1);
+  const allocateSms = () => smsMap.push([]);
+  const allocate = () => (allocateTor(), allocateSms());
+  
+  const getIfHasFreeSpace = (word, p = cursor) => {
+    const smsLen = getSmsLen(p);
+    const wordlen = word.length;
+    const lTorLen = getLTorLen();
+    const rTorLen = getRTorLen();
+    const expectedLen = smsLen + 1 + wordlen + 1 + lTorLen + 1 + rTorLen;
+    return expectedLen <= LIMIT;
+  };
+
+  const doSms = () => {
+    for (let i = 0; i < words.length; i++) {
+      const prev = words[i - 1];
+      const current = words[i];
+  
+      if (!prev) pushToSms(current); else {
+        if (!getIfHasFreeSpace(current)) {
+          allocate();
+          moveCursor();
+        }
+  
+        pushToSms(current);
+      }
+    }
+  };
+
+  const prepareResult = () => {
+    return smsMap.map((sms, idx) => [
+      sms.join(' '), 
+
+      [
+        getLTor(idx),
+        getRTor(),
+      ].join('/'),
+    ].join(' '));
+  };
+
+  return [doSms(), prepareResult()][1];
+}
+
+function printResults(results = [], fixtures = []) {
+  if (PRINT_RESULTS) results.forEach((result, idx) => {
+    const inp = fixtures[idx];
+    const inpLen = inp.length;
     const resLen = result.map(r => r.length);
     const resVal = result;
-    console.log(`[${(idx + 1)}]`, { inp, resLen, resVal });
+    console.log(`[${(idx + 1)}]`, { inp, inpLen, LIMIT, resLen, resVal });
     console.log('=================================');
   });  
 }
 
-function work(input = '') {
-  if (input.length <= LIMIT) {
-    return [input];
-  }
+// FIXTURES
 
-  let words = input.split(DELIMITER);
-      words = words.map((word, idx) => ({ cu: word, prev: words[idx - 1], next: words[idx + 1] }));
+function getFixtures() {
+  const useOnly = [1]; 
+  // const useOnly = [];
+  const skipAt = [];
 
-  const sms = [[]];
+  const fixtures = [
+    '1234567890qwerty 123456789 123456789 123456789 123456789 123456789 123456789 123456789 123456789 123456789 123456789 123456789 123456789 123456789 1234567890qwerty',
 
-  let word,
-      p = 0;
-
-  const getSmslength = () => 
-    // every word 
-    sms[p].reduce((acc, cu) => acc + cu.length, 0) + 
-    // and spaces between them
-    (sms[p].length >= 1 ? sms[p].length - 1 : 0);
-
-  while((word = words.shift())) {
-    const {prev, cu, next} = word;
+    'The map above is very easy to use By default the location of all existing objects in the game is immediately marked on if it information is constantly updated If you need a specific item then click on the funnel icon in the upper right corner to open the legend',
     
-    // story's beginning and ending
-    if (!prev) sms[p].push(cu); else if (!next) {
-      // sms + ' ' + word + ' ' + ord + '/' + sms.length
-      if ((getSmslength() + 1 + cu.length + 1 + (p + 1) + 1 + sms.length) >= LIMIT) {        
-        sms[p].push(`${(p + 1)}`);
-        p++;
-        sms.push([cu, `${(p + 1)}`]); 
-      } else sms[p].push(`${cu} ${(p + 1)}`);
-    } else {
-      // middle-earth
-      if ((getSmslength() + 1 + cu.length) > LIMIT) {
-        const last =  sms[p].pop();
-        sms[p].push(`${(p + 1)}`);
-        sms.push([last]); 
-        p++;
-      }
+    'Lorem ipsum dolor sit amet consectetur adipiscing elit',
+    
+    'Lorem ipsum dolor sit amet consectetur adipiscing elit Nullam eleifend odio at magna pretium suscipit Nam commodo mauris felis ut suscipit velit efficitur eget Sed sit amet posuere risus',
+    
+    // if it information => ifit it information
+    'BROKEN The map above is very easy to use By default the location of all existing objects in the game is immediately marked on ifif it it information is constantly updated If you need a specific item then click on the funnel icon in the upper right corner to open the legend',
+  ];
 
-      sms[p].push(cu);
-    }    
+  if (useOnly.length) {
+    return fixtures.filter((_, idx) => useOnly.includes(idx + 1));
+  } else if (!skipAt.length) return fixtures; else {
+    return fixtures.filter((_, idx) => !skipAt.includes(idx + 1));   
   }
-
-  return sms.map(item => item.join(' ')).map(s => `${s}/${sms.length}`);
 }
-
-
