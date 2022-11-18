@@ -1,3 +1,9 @@
+/**
+ * Tor, LTor, RTor - all that is sms terminators like k/N, 
+ * where (k) is ordinal number of a sms
+ * and (N) is all sms items count. 
+ */
+
 // HEAD
 
 // a better case will be moving of it in the fixtures
@@ -30,7 +36,9 @@ function work(input = '') {
   const getLTor = (p = cursor) => torSet[p];
   const getLTorLen = (p = cursor) => getLTor(p).toString().length;
   const getRTor = () => smsMap.length;
-  const getRTorLen = () => smsMap.length.toString().length;
+  
+  // rtor is count of sms items, i.e. smsMap.length 
+  const getRTorLen = () => getRTor().toString().length;
 
   const getSmsSpacesCount = (p = cursor) => {
     const wordsCount = getSms(p).length;
