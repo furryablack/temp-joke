@@ -111,8 +111,7 @@ function printResults(results = [], fixtures = []) {
 // FIXTURES
 
 function getFixtures() {
-  const useOnly = [1]; 
-  // const useOnly = [];
+  const useOnly = [3, 4];
   const skipAt = [];
 
   const fixtures = [
