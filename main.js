@@ -31,13 +31,14 @@ function work(input = '') {
   let cursor = 0,
       smsMap = [[]],
       torSet = [1];
+  
+  let smsItemsCount = Math.floor(input.length / LIMIT);
+      smsItemsCount = (input.length % LIMIT) ? smsItemsCount + 1 : smsItemsCount;
 
   const getSms = (p = cursor) => smsMap[p];
   const getLTor = (p = cursor) => torSet[p];
   const getLTorLen = (p = cursor) => getLTor(p).toString().length;
-  const getRTor = () => smsMap.length;
-  
-  // rtor is count of sms items, i.e. smsMap.length 
+  const getRTor = () => smsItemsCount;  
   const getRTorLen = () => getRTor().toString().length;
 
   const getSmsSpacesCount = (p = cursor) => {
@@ -46,40 +47,31 @@ function work(input = '') {
   };
 
   const getSmsLen = (p = cursor) => getSms(p).reduce((acc, cu) => acc + cu.length, 0) + getSmsSpacesCount(p);
-  const pushToSms = (word, p = cursor) => getSms(p).push(word);
-  
-  const moveCursor = (back = false) => {
-    if (!back) cursor++; else {
-      cursor = cursor > 0 ? cursor - 1 : cursor;
-    }
-  };
-
+  const pushToSms = (word, p = cursor) => getSms(p).push(word);  
+  const moveCursor = () => ++cursor;
   const allocateTor = () => torSet.push(torSet.length + 1);
   const allocateSms = () => smsMap.push([]);
   const allocate = () => (allocateTor(), allocateSms());
+  const nextSpark = () => (allocate(), moveCursor());
   
   const getIfHasFreeSpace = (word, p = cursor) => {
     const smsLen = getSmsLen(p);
     const wordlen = word.length;
-    const lTorLen = getLTorLen();
-    const rTorLen = getRTorLen();
+    const lTorLen = getLTorLen(p);
+    const rTorLen = getRTorLen(p);
     const expectedLen = smsLen + 1 + wordlen + 1 + lTorLen + 1 + rTorLen;
     return expectedLen <= LIMIT;
   };
 
   const doSms = () => {
     for (let i = 0; i < words.length; i++) {
-      const prev = words[i - 1];
       const current = words[i];
   
-      if (!prev) pushToSms(current); else {
-        if (!getIfHasFreeSpace(current)) {
-          allocate();
-          moveCursor();
-        }
-  
-        pushToSms(current);
-      }
+      if (!getIfHasFreeSpace(current)) {
+        nextSpark();  
+      } 
+
+      pushToSms(current);
     }
   };
 
@@ -99,11 +91,9 @@ function work(input = '') {
 
 function printResults(results = [], fixtures = []) {
   if (PRINT_RESULTS) results.forEach((result, idx) => {
-    const inp = fixtures[idx];
-    const inpLen = inp.length;
-    const resLen = result.map(r => r.length);
-    const resVal = result;
-    console.log(`[${(idx + 1)}]`, { inp, inpLen, LIMIT, resLen, resVal });
+    const inp = [fixtures[idx].length, fixtures[idx]];
+    const res = result.map(r => [r.length, r]);
+    console.log(`[${(idx + 1)}]`, { inp, LIMIT, res });
     console.log('=================================');
   });  
 }
@@ -111,11 +101,11 @@ function printResults(results = [], fixtures = []) {
 // FIXTURES
 
 function getFixtures() {
-  const useOnly = [3, 4];
+  const useOnly = [1];
   const skipAt = [];
 
   const fixtures = [
-    '1234567890qwerty 123456789 123456789 123456789 123456789 123456789 123456789 123456789 123456789 123456789 123456789 123456789 123456789 123456789 1234567890qwerty',
+    '1234567890qwerty 123456789 123456789 123456789 123456789 123456789 123456789 123456789 123456789 123456789 123456789 123456789 123456789 123456789 1234567890qwerty 1234567890qwerty 123456789 123456789 123456789 123456789 123456789 123456789 123456789 123456789 123456789 123456789 123456789 123456789 123456789 1234567890qwerty 1234567890qwerty 123456789 123456789 123456789 123456789 123456789 123456789 12345 123456789 1234 1234 123456789 123456789 123456789 1234567890qwerty 1234567890qwerty 123456789 123456789 123456789 123456789 123456789 123456789 123456789 123456789 123456789 123456789 123456789 123456789 123456789 1234567890qwerty 1234567890qwerty 123456789 123456789 123456789 123456789 123456789 123456789 123456789 123456789 123456789 123456789 123456789 123456789 123456789 1234567890qwerty 1234567890qwerty 123456789 123456789 123456789 123456789 123456789 123456789 123456789 123456789 123456789 123456789 123456789 123456789 123456789 1234567890qwerty 1234567890qwerty 123456789 123456789 123456789 123456789 123456789 123456789 12345 123456789 1234 1234 123456789 123456789 123456789 1234567890qwerty 1234567890qwerty 123456789 123456789 123456789 123456789 123456789 123456789 123456789 123456789 123456789 123456789 123456789 123456789 123456789 1234567890qwerty',
 
     'The map above is very easy to use By default the location of all existing objects in the game is immediately marked on if it information is constantly updated If you need a specific item then click on the funnel icon in the upper right corner to open the legend',
     
